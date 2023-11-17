@@ -848,6 +848,8 @@
       width: 124px;
       min-height: 124px;
       margin-bottom: 0;
+      margin-left: 0;
+      margin-right: 0;
     }
     .megaProductInfo {
       min-height: auto;
