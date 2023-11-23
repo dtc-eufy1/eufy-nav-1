@@ -2372,6 +2372,9 @@ const Navbar = () => {
             onAction: () => {
               let _headerSetting = cloneDeep(headerSetting);
               let parent = _headerSetting[current].tabs[currentChild];
+              if (!parent.collects) {
+                parent.collects = [];
+              }
               if (!parent.collects[currentLastChild]) {
                 parent.collects[currentLastChild] = {};
               }
