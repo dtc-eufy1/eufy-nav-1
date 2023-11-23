@@ -1760,15 +1760,13 @@ const Navbar = () => {
                             currentChild == idx ? s.actived : ""
                           }`}
                         >
-                          {tab.collects && (
-                            <div className={s.megaProductCollect}>
-                              <MegaCollectContain
-                                tab={tab}
-                                index={0}
-                                refidx={idx + 1}
-                              />
-                            </div>
-                          )}
+                          <div className={s.megaProductCollect}>
+                            <MegaCollectContain
+                              tab={tab}
+                              index={0}
+                              refidx={idx + 1}
+                            />
+                          </div>
                           <div className={s.megaSubtabContain}>
                             <ul className={s.megaSubtabList}>
                               {tab.tabs &&
