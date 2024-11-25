@@ -86,8 +86,8 @@
   }
 
   /* @screen min-xl { */
-    padding-left: 16px;
-    padding-right: 16px;
+  padding-left: 16px;
+  padding-right: 16px;
   /* } */
 }
 
@@ -224,7 +224,7 @@
 
     &::after {
       @apply align-middle;
-      content: '';
+      content: "";
       margin-left: 8px;
       display: inline-block;
       width: 16px;
@@ -250,7 +250,7 @@
   transition: 0.1s ease-out;
 
   /* @screen min-xl { */
-    width: calc((100% - 36px) / 4);
+  width: calc((100% - 36px) / 4);
   /* } */
 
   & > a {
@@ -288,12 +288,24 @@
   }
 }
 
+.subTabEmptyWrapper {
+  @apply text-center;
+}
+
+.subTabEmptyTitle {
+  @apply text-[24px] leading-[1.2] text-[#333] font-medium mb-8;
+}
+
+.subTabTypeItem {
+  /* @apply flex flex-col gap-6 text-[16px] font-medium leading-[1.2] py-2 px-4 cursor-pointer; */
+}
+
 .megaProductImg {
   margin-bottom: 8px;
   width: 175px;
 
   /* @screen min-xl { */
-    width: 200px;
+  width: 200px;
   /* } */
 }
 
@@ -508,7 +520,7 @@
 .mobLinkTypeoflinks,
 .mobLinkTypeofdeals {
   &:after {
-    content: '';
+    content: "";
     position: absolute;
     right: 0;
     top: 50%;
@@ -730,7 +742,7 @@
   }
 
   &:after {
-    content: '';
+    content: "";
     @apply ml-2 inline-block h-4 w-4 bg-[100%] bg-no-repeat align-middle;
     background-image: url(https://cdn.shopify.com/s/files/1/0504/7094/4954/files/Kit-Arrows.svg?v=1681869286);
   }
@@ -834,33 +846,33 @@
 }
 
 /* @screen min-xl { */
-  :global(.header-v3-ab-new) {
-    .megaProductItem {
-      padding: 13px 21px;
-      width: calc((100% - 32px) / 3);
-      height: 150px;
-      & > a {
-        display: flex;
-        align-items: center;
-      }
-    }
-    .megaProductImg {
-      width: 124px;
-      min-height: 124px;
-      margin-bottom: 0;
-      margin-left: 0;
-      margin-right: 0;
-    }
-    .megaProductInfo {
-      min-height: auto;
-      margin-left: 16px;
-      text-align: left;
+:global(.header-v3-ab-new) {
+  .megaProductItem {
+    padding: 13px 21px;
+    width: calc((100% - 32px) / 3);
+    height: 150px;
+    & > a {
+      display: flex;
+      align-items: center;
     }
   }
+  .megaProductImg {
+    width: 124px;
+    min-height: 124px;
+    margin-bottom: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .megaProductInfo {
+    min-height: auto;
+    margin-left: 16px;
+    text-align: left;
+  }
+}
 /* } */
 
 .megaProductCollect {
-  display: none;
+  /* display: none; */
 }
 .megaProductCollectList {
   display: flex;
@@ -868,8 +880,8 @@
   column-gap: 16px;
   row-gap: 16px;
   /* @screen min-xl { */
-    column-gap: 11px;
-    row-gap: 11px;
+  column-gap: 11px;
+  row-gap: 11px;
   /* } */
 }
 .metaProductCollectItem {
@@ -882,11 +894,11 @@
   border-radius: 16px;
 
   /* @screen min-xl { */
-    padding-top: 20px;
-    width: calc((100% - 44px) / 5);
-    /* height: 416px; */
-    height: auto;
-    text-align: left;
+  padding-top: 20px;
+  width: calc((100% - 44px) / 5);
+  /* height: 416px; */
+  height: auto;
+  text-align: left;
   /* } */
 }
 .metaProductCollectItemAdd {
@@ -902,9 +914,9 @@
   margin-bottom: 11px;
   object-fit: contain;
   /* @screen min-xl { */
-    width: 174px;
-    height: 112px;
-    margin-bottom: 20px;
+  width: 174px;
+  height: 112px;
+  margin-bottom: 20px;
   /* } */
 }
 .megaProductCollectTitle {
@@ -937,7 +949,7 @@
     }
   }
   /* @screen min-xl { */
-    display: block;
+  display: block;
   /* } */
 }
 .megaProductCollectMore {
@@ -950,7 +962,7 @@
     margin-top: 8px;
   }
   /* @screen min-xl { */
-    display: block;
+  display: block;
   /* } */
 }
 .mobNavProductCollect {
@@ -968,7 +980,7 @@
   text-align: center;
   border-radius: 8px;
   /* @screen min-md { */
-    width: calc(100% / 3 - 8px);
+  width: calc(100% / 3 - 8px);
   /* } */
   a {
     display: block;
@@ -990,7 +1002,7 @@
   font-weight: 500;
   margin-top: 8px;
 }
-:global(.header-v3-ab-add) {
+/* :global(.header-v3-ab-add) {
   .megaProductCollect {
     display: block;
     & ~ * {
@@ -1003,7 +1015,7 @@
       display: none;
     }
   }
-}
+} */
 
 .megaProductAdd {
   display: flex;

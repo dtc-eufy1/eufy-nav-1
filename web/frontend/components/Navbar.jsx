@@ -7,6 +7,9 @@ import {
   FormLayout,
   TextField,
   Spinner,
+  Box,
+  Select,
+  ButtonGroup,
 } from "@shopify/polaris";
 import {
   SearchMajor,
@@ -16,14 +19,24 @@ import {
   MobileHamburgerMajor,
   MobileBackArrowMajor,
   CancelMajor,
+  EditMajor,
+  PlusMinor,
+  MinusMajor,
 } from "@shopify/polaris-icons";
 import { useAppQuery, useAuthenticatedFetch } from "../hooks";
 import { Redirect } from "@shopify/app-bridge/actions";
 import { useAppBridge } from "@shopify/app-bridge-react";
-import { cloneDeep } from "lodash";
+import { cloneDeep, set } from "lodash";
 import classNames from "classnames";
 import s from "./index.module.css";
 import "../assets/navbar.css";
+import MainCategoryModal from "./MainCategoryModal";
+import MainTabModal from "./MainTabModal";
+import MainDealsModal from "./MainDealsModal";
+import MainLinksModal from "./MainLinksModal";
+import SubTabListProductModal from "./SubTabListProductModal";
+import SubTabLinksModal from "./SubTabLinksModal";
+import SubTabCategoryModal from "./SubTabCategoryModal";
 
 const Image = ({ ...props }) => {
   return <img {...props} />;
@@ -36,6 +49,7 @@ const Picture = ({ ...props }) => {
 const Navbar = () => {
   const app = useAppBridge();
   const redirect = Redirect.create(app);
+  const [isEdit, setIsEdit] = useState(false);
 
   const [current, setCurrent] = useState(1);
   const [currentChild, setCurrentChild] = useState(0);
@@ -62,6 +76,7 @@ const Navbar = () => {
   const [index, setIndex] = useState();
   const [subIndex, setSubIndex] = useState();
   const [isEditLink, setIsEditLink] = useState(false);
+
   const [isSubEditLink, setIsSubEditLink] = useState(false);
   const [isEditTab, setIsEditTab] = useState(false);
   const [isEditLinkMore, setIsEditLinkMore] = useState(false);
@@ -86,6 +101,22 @@ const Navbar = () => {
   const locale = "us";
   const BRAND = "eufy";
   const livestream = {};
+
+  const [mainCategoryEdit, setMainCategoryEdit] = useState(false);
+  const [mainTabEdit, setMainTabEdit] = useState(false);
+
+  const [mainDealsEdit, setMainDealsEdit] = useState(false);
+
+  const [mainLinksEdit, setMainLinksEdit] = useState(false);
+  const [linkMode, setLinkMode] = useState("");
+
+  const [subTabListEdit, setSubTabListEdit] = useState(false);
+
+  const [subTabLinksEdit, setSubTabLinksEdit] = useState(false);
+
+  const [subTabCategoryEdit, setSubTabCategoryEdit] = useState(false);
+  const [selectedSubTabType, setSelectedSubTabType] = useState("");
+
   const userCenterSetting = {
     signIn: "Sign in",
     signUp: "Sign up",
@@ -1215,6 +1246,8 @@ const Navbar = () => {
 
   // const s = {};
 
+  console.log(headerSetting, "headerSetting");
+
   const fetch = useAuthenticatedFetch();
 
   useAppQuery({
@@ -1394,7 +1427,7 @@ const Navbar = () => {
   };
 
   const MegaProductContain = ({ tab, index, refidx, seeMore }) => {
-    const { list, links, more } = tab;
+    const { list = [], links = [], more } = tab;
     const moreLink = more || seeMore;
     const listLen = list && list.length > 4 ? 4 : list.length;
     const linksLen = (links && links.length) || 0;
@@ -1462,7 +1495,8 @@ const Navbar = () => {
                 setHref();
                 setCurrentSubChild(index);
                 setCurrentLastChild(list?.length || 0);
-                setIsEditTab(true);
+                // setIsEditTab(true);
+                setSubTabListEdit(true);
               }}
             >
               Add
@@ -1470,30 +1504,37 @@ const Navbar = () => {
           </li>
         </ul>
         <div className="flex items-center justify-between pt-6">
-          {links && links.length && (
-            <div className={s.megaCollectLinks}>
-              {links.map((item, idx) => {
-                return (
-                  <div key={idx}>
-                    <a
-                      className={s.megaCollectLink}
-                      href={handleMenuUrl(
-                        item.href,
-                        false,
-                        "ref",
-                        `navimenu_${current + 1}_${refidx}_${
-                          listLen + idx + 1
-                        }_copy`
-                      )}
-                    >
-                      <span>{item.label}</span>
-                    </a>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          {!links && <div></div>}
+          <div className={s.megaCollectLinks}>
+            {links.map((item, idx) => {
+              return (
+                <div key={idx}>
+                  <a
+                    className={s.megaCollectLink}
+                    href={handleMenuUrl(
+                      item.href,
+                      false,
+                      "ref",
+                      `navimenu_${current + 1}_${refidx}_${
+                        listLen + idx + 1
+                      }_copy`
+                    )}
+                  >
+                    <span>{item.label}</span>
+                  </a>
+                </div>
+              );
+            })}
+            <Button
+              plain
+              monochrome
+              icon={CirclePlusMinor}
+              onClick={() => {
+                setSubTabLinksEdit(true);
+              }}
+            >
+              Add Links
+            </Button>
+          </div>
           {moreLink && (
             <div>
               <Button className={s.megaCollectMore} variant="secondaryBlack">
@@ -1672,7 +1713,7 @@ const Navbar = () => {
               setIsEditCollect(true);
             }}
           >
-            Add
+            Add Collects
           </Button>
         </li>
       </ul>
@@ -1681,6 +1722,23 @@ const Navbar = () => {
 
   const MegaWrapper = ({ item, current, index }) => {
     const { type, mode, tabs, links, group, more } = item;
+    const [selectedSubLists, setSelectedSubLists] = useState({});
+    useEffect(() => {
+      const obj = {};
+      tabs?.forEach((tab, idx) => {
+        const tabKeys = Object.keys(tab);
+        if (tabKeys.includes("list")) {
+          obj[`${index}_${idx}`] = "list";
+        } else if (tabKeys.includes("tabs")) {
+          obj[`${index}_${idx}`] = "tabs";
+        } else if (tabKeys.includes("collects")) {
+          obj[`${index}_${idx}`] = "collects";
+        }
+        return obj;
+      });
+      setSelectedSubLists(obj);
+    }, [tabs, index]);
+
     return (
       <>
         <div
@@ -1715,6 +1773,9 @@ const Navbar = () => {
                                   onMouseEnter={() => {
                                     setCurrentChild(idx);
                                     setCurrentSubTab(0);
+                                    setSelectedSubTabType(
+                                      selectedSubLists[`${index}_${idx}`]
+                                    );
                                   }}
                                 >
                                   {tab.label}
@@ -1724,7 +1785,7 @@ const Navbar = () => {
                           })}
                       </ol>
                     </div>
-                    {links && links.length && (
+                    {links && !!links.length && (
                       <div className={s.megaTabLinks}>
                         {links.map((link, idx) => {
                           return (
@@ -1746,6 +1807,18 @@ const Navbar = () => {
                         })}
                       </div>
                     )}
+                    <div className="mt-4">
+                      <Button
+                        plain
+                        monochrome
+                        icon={CirclePlusMinor}
+                        onClick={() => {
+                          setMainTabEdit(true);
+                        }}
+                      >
+                        Add
+                      </Button>
+                    </div>
                   </aside>
                   <div
                     className={`${s.megaTabContent} ${
@@ -1753,6 +1826,8 @@ const Navbar = () => {
                     }`}
                   >
                     {tabs?.map((tab, idx) => {
+                      const subTabEmpty =
+                        !tab?.tabs && !tab?.collects && !tab?.list;
                       return (
                         <div
                           key={idx}
@@ -1760,34 +1835,18 @@ const Navbar = () => {
                             currentChild == idx ? s.actived : ""
                           }`}
                         >
-                          <div className={s.megaProductCollect}>
-                            <MegaCollectContain
-                              tab={tab}
-                              index={0}
-                              refidx={idx + 1}
-                            />
-                          </div>
-                          <div className={s.megaSubtabContain}>
-                            <ul className={s.megaSubtabList}>
-                              {tab.tabs &&
-                                tab.tabs.map((subtab, subidx) => {
-                                  return (
-                                    <li
-                                      key={subidx}
-                                      className={`${s.megaSubTabItem} ${
-                                        currentSubTab == subidx ? s.actived : ""
-                                      }`}
-                                      onMouseEnter={() => {
-                                        setCurrentSubTab(subidx);
-                                      }}
-                                    >
-                                      {subtab.label}
-                                    </li>
-                                  );
-                                })}
-                            </ul>
-                          </div>
-                          {tab.list && (
+                          {selectedSubLists[`${index}_${currentChild}`] ===
+                            "collects" && (
+                            <div className={s.megaProductCollect}>
+                              <MegaCollectContain
+                                tab={tab}
+                                index={0}
+                                refidx={idx + 1}
+                              />
+                            </div>
+                          )}
+                          {selectedSubLists[`${index}_${currentChild}`] ===
+                            "list" && (
                             <MegaProductContain
                               tab={tab}
                               index={0}
@@ -1795,18 +1854,101 @@ const Navbar = () => {
                               refidx={idx + 1}
                             />
                           )}
-                          {tab.tabs &&
-                            tab.tabs.map((subtab, subidx) => {
-                              return (
-                                <MegaProductContain
-                                  key={subidx}
-                                  tab={subtab}
-                                  seeMore={tab.more}
-                                  index={subidx}
-                                  refidx={`${idx + 1}_${subidx + 1}`}
-                                />
-                              );
-                            })}
+                          {selectedSubLists[`${index}_${currentChild}`] ===
+                            "tabs" && (
+                            <>
+                              <div className={s.megaSubtabContain}>
+                                <ul className={s.megaSubtabList}>
+                                  {tab.tabs &&
+                                    tab.tabs.map((subtab, subidx) => {
+                                      return (
+                                        <li
+                                          key={subidx}
+                                          className={`${s.megaSubTabItem} ${
+                                            currentSubTab == subidx
+                                              ? s.actived
+                                              : ""
+                                          }`}
+                                          onMouseEnter={() => {
+                                            setCurrentSubTab(subidx);
+                                          }}
+                                        >
+                                          {subtab.label}
+                                        </li>
+                                      );
+                                    })}
+                                  <li>
+                                    <Button
+                                      plain
+                                      monochrome
+                                      icon={CirclePlusMinor}
+                                      onClick={() => {
+                                        setSubTabCategoryEdit(true);
+                                      }}
+                                    >
+                                      Add Category
+                                    </Button>
+                                  </li>
+                                </ul>
+                              </div>
+                              {tab.tabs &&
+                                tab.tabs.map((subtab, subidx) => {
+                                  return (
+                                    <MegaProductContain
+                                      key={subidx}
+                                      tab={subtab}
+                                      seeMore={tab.more}
+                                      index={subidx}
+                                      refidx={`${idx + 1}_${subidx + 1}`}
+                                    />
+                                  );
+                                })}
+                            </>
+                          )}
+                          {subTabEmpty &&
+                            !selectedSubLists[`${index}_${currentChild}`] && (
+                              <div className={s.subTabEmptyWrapper}>
+                                <div className={s.subTabEmptyTitle}>
+                                  请选择类型
+                                </div>
+                                <ButtonGroup>
+                                  <Button
+                                    className={s.subTabTypeItem}
+                                    onClick={() => {
+                                      setSelectedSubLists({
+                                        [`${index}_${currentChild}`]: "list",
+                                      });
+                                      setSelectedSubTabType("list");
+                                    }}
+                                  >
+                                    list
+                                  </Button>
+                                  <Button
+                                    className={s.subTabTypeItem}
+                                    onClick={() => {
+                                      setSelectedSubLists({
+                                        [`${index}_${currentChild}`]: "tabs",
+                                      });
+                                      setSelectedSubTabType("tabs");
+                                    }}
+                                  >
+                                    tabs
+                                  </Button>
+                                  <Button
+                                    className={s.subTabTypeItem}
+                                    onClick={() => {
+                                      setSelectedSubLists({
+                                        [`${index}_${currentChild}`]:
+                                          "collects",
+                                      });
+                                      setSelectedSubTabType("collects");
+                                    }}
+                                  >
+                                    collects
+                                  </Button>
+                                </ButtonGroup>
+                              </div>
+                            )}
                         </div>
                       );
                     })}
@@ -1815,6 +1957,19 @@ const Navbar = () => {
               )}
               {type == "links" && (
                 <>
+                  <div className=" absolute z-[1] right-6 top-2">
+                    <Button
+                      plain
+                      monochrome
+                      icon={CirclePlusMinor}
+                      onClick={() => {
+                        setLinkMode(mode || "");
+                        setMainLinksEdit(true);
+                      }}
+                    >
+                      Add
+                    </Button>
+                  </div>
                   <div className={s.megaLinksContent}>
                     {group &&
                       group.map((gp, idx) => {
@@ -1847,52 +2002,66 @@ const Navbar = () => {
                 </>
               )}
               {type == "deals" && (
-                <div className="flex w-full justify-center gap-x-4">
-                  {links &&
-                    links.map((link, idx) => {
-                      return (
-                        <div key={idx} className={s.megaDealsItem}>
-                          <div className={s.megaDealsImgWrap}>
-                            <Picture
-                              className={classNames({
-                                [s.megaDealsImg]: links.length > 1,
-                                [s.megaDealsFullImg]: links.length === 1,
+                <div className="flex-1">
+                  <div className="text-right pr-12">
+                    <Button
+                      plain
+                      monochrome
+                      icon={CirclePlusMinor}
+                      onClick={() => {
+                        setMainDealsEdit(true);
+                      }}
+                    >
+                      Add
+                    </Button>
+                  </div>
+                  <div className="flex w-full justify-center gap-x-4">
+                    {links &&
+                      links.map((link, idx) => {
+                        return (
+                          <div key={idx} className={s.megaDealsItem}>
+                            <div className={s.megaDealsImgWrap}>
+                              <Picture
+                                className={classNames({
+                                  [s.megaDealsImg]: links.length > 1,
+                                  [s.megaDealsFullImg]: links.length === 1,
+                                })}
+                                source={
+                                  links.length > 1 ? link.img : link.img_full
+                                }
+                              ></Picture>
+                            </div>
+                            <div
+                              className={classNames(s.megaDealsInfoWrap, {
+                                [s.megaDealsFullInfo]: links.length === 1,
                               })}
-                              source={
-                                links.length > 1 ? link.img : link.img_full
-                              }
-                            ></Picture>
-                          </div>
-                          <div
-                            className={classNames(s.megaDealsInfoWrap, {
-                              [s.megaDealsFullInfo]: links.length === 1,
-                            })}
-                          >
-                            <a
-                              className={s.navBarFullLink}
-                              href={handleMenuUrl(
-                                link.href,
-                                false,
-                                "ref",
-                                `navimenu_${index + 1}_1_${idx + 1}_copy`
-                              )}
-                            ></a>
-                            <p className={s.dealsTitle}>{link.title}</p>
-                            <a
-                              className={s.linkBtn}
-                              href={handleMenuUrl(
-                                link.href,
-                                false,
-                                "ref",
-                                `navimenu_${index + 1}_1_${idx + 1}_copy`
-                              )}
                             >
-                              {shopCommon.learn_more}
-                            </a>
+                              <a
+                                className={s.navBarFullLink}
+                                href={handleMenuUrl(
+                                  link.href,
+                                  false,
+                                  "ref",
+                                  `navimenu_${index + 1}_1_${idx + 1}_copy`
+                                )}
+                              ></a>
+                              <p className={s.dealsTitle}>{link.title}</p>
+                              <a
+                                className={s.linkBtn}
+                                href={handleMenuUrl(
+                                  link.href,
+                                  false,
+                                  "ref",
+                                  `navimenu_${index + 1}_1_${idx + 1}_copy`
+                                )}
+                              >
+                                {shopCommon.learn_more}
+                              </a>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                  </div>
                 </div>
               )}
             </div>
@@ -2034,6 +2203,14 @@ const Navbar = () => {
                     )
                   );
                 })}
+              {isEdit && (
+                <li
+                  className={s.mainNavLink}
+                  onClick={() => setMainCategoryEdit(true)}
+                >
+                  <Icon source={EditMajor} />
+                </li>
+              )}
             </ul>
             <ul className="flex">
               {headerSetting &&
@@ -2200,6 +2377,18 @@ const Navbar = () => {
           <Spinner accessibilityLabel="Spinner example" size="large" />
         </div>
       )}
+      <Box className="flex justify-end gap-4 pr-4">
+        {isEdit ? (
+          <>
+            <Button onClick={() => setIsEdit(false)}>取消</Button>
+            <Button primary>保存</Button>
+          </>
+        ) : (
+          <Button primary onClick={() => setIsEdit(true)}>
+            编辑
+          </Button>
+        )}
+      </Box>
       <header
         className={classNames(s.headerV3, "header-v3-ab-new")}
         id="headerV3"
@@ -2594,7 +2783,7 @@ const Navbar = () => {
             <Form>
               <FormLayout>
                 <TextField
-                  label="label"
+                  label="Type"
                   value={label}
                   onChange={(value) => setLabel(value)}
                 />
@@ -2636,6 +2825,101 @@ const Navbar = () => {
             </Form>
           </Modal.Section>
         </Modal>
+
+        <MainCategoryModal
+          mainCategoryEdit={mainCategoryEdit}
+          headerSetting={headerSetting}
+          onClose={() => setMainCategoryEdit(false)}
+          onSave={(dataSource) => {
+            updateMenus(dataSource, () => {
+              setMainCategoryEdit(false);
+            });
+          }}
+        />
+
+        <MainTabModal
+          mainTabEdit={mainTabEdit}
+          headerSetting={headerSetting}
+          mainTabEditIndex={current}
+          onClose={() => setMainTabEdit(false)}
+          onSave={(dataSource) => {
+            updateMenus(dataSource, () => {
+              setMainTabEdit(false);
+            });
+          }}
+        />
+
+        <MainDealsModal
+          mainDealsEdit={mainDealsEdit}
+          headerSetting={headerSetting}
+          mainDealsEditIndex={current}
+          onClose={() => setMainDealsEdit(false)}
+          onSave={(dataSource) => {
+            updateMenus(dataSource, () => {
+              setMainDealsEdit(false);
+            });
+          }}
+        />
+
+        <MainLinksModal
+          mainLinksEdit={mainLinksEdit}
+          headerSetting={headerSetting}
+          mainLinksEditIndex={current}
+          onClose={() => setMainLinksEdit(false)}
+          mode={linkMode}
+          onSave={(dataSource) => {
+            updateMenus(dataSource, () => {
+              setMainLinksEdit(false);
+            });
+          }}
+        />
+
+        {subTabListEdit && (
+          <SubTabListProductModal
+            subTabListEdit={subTabListEdit}
+            headerSetting={headerSetting}
+            subTabListEditIndex={current}
+            subTabListProductsEditIndex={currentChild}
+            subTabListCategoryEditIndex={currentSubChild}
+            selectedSubTabType={selectedSubTabType}
+            onClose={() => setSubTabListEdit(false)}
+            onSave={(dataSource) => {
+              updateMenus(dataSource, () => {
+                setSubTabListEdit(false);
+              });
+            }}
+          />
+        )}
+
+        {subTabLinksEdit && (
+          <SubTabLinksModal
+            subTabLinksEdit={subTabLinksEdit}
+            onClose={() => setSubTabLinksEdit(false)}
+            headerSetting={headerSetting}
+            onSave={(dataSource) => {
+              updateMenus(dataSource, () => {
+                setSubTabLinksEdit(false);
+              });
+            }}
+            subTabEditIndex={current}
+            subTabLinksEditIndex={currentChild}
+          />
+        )}
+
+        {subTabCategoryEdit && (
+          <SubTabCategoryModal
+            subTabCategoryEdit={subTabCategoryEdit}
+            subTabCategoryEditIndex={currentChild}
+            subTabEditIndex={current}
+            onClose={() => setSubTabCategoryEdit(false)}
+            headerSetting={headerSetting}
+            onSave={(dataSource) => {
+              updateMenus(dataSource, () => {
+                setSubTabCategoryEdit(false);
+              });
+            }}
+          />
+        )}
       </header>
     </>
   );
